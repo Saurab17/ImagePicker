@@ -67,11 +67,12 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
         screen.fill(WINDOW_BG_COLOR)
 
         img_path = images[index]
-        pil_img = Image.open(img_path).convert("RGB")
-        pil_img = fit_image_to_screen(pil_img, screen.get_size())
-        img_surface = pygame.image.fromstring(
-            pil_img.tobytes(), pil_img.size, pil_img.mode
-        )
+        with Image.open(img_path) as img:
+            pil_img = img.convert("RGB")
+            pil_img = fit_image_to_screen(pil_img, screen.get_size())
+            img_surface = pygame.image.fromstring(
+                pil_img.tobytes(), pil_img.size, pil_img.mode
+            )
 
         rect = img_surface.get_rect(center=screen.get_rect().center)
         screen.blit(img_surface, rect)
