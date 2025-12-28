@@ -81,6 +81,10 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
     next_index = None
     preload_thread = None
 
+    # Font for image counter overlay
+    font_size = 36  # visible but not intrusive
+    counter_font = pygame.font.SysFont("DejaVu Sans", font_size, bold=True)
+
     def preload_next(index_to_preload):
         nonlocal next_surface, next_index
 
@@ -95,6 +99,31 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
             next_surface = None
             next_index = None
 
+    def draw_image_counter(surface, index, total):
+        text = f"{index + 1} / {total}"
+        text_surface = counter_font.render(text, True, (255, 255, 255))
+
+        padding = 12
+        bg_rect = text_surface.get_rect()
+        bg_rect.topright = (
+            surface.get_width() - padding,
+            padding
+        )
+
+        # Semi-transparent background for readability
+        overlay_bg = pygame.Surface(
+            (bg_rect.width + 16, bg_rect.height + 10),
+            pygame.SRCALPHA
+        )
+        overlay_bg.fill((0, 0, 0, 140))  # black with transparency
+
+        surface.blit(
+            overlay_bg,
+            (bg_rect.left - 8, bg_rect.top - 5)
+        )
+        surface.blit(text_surface, bg_rect)
+
+
     while True:
         if needs_redraw:
             screen.fill(WINDOW_BG_COLOR)
@@ -105,6 +134,7 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
 
             rect = current_surface.get_rect(center=screen.get_rect().center)
             screen.blit(current_surface, rect)
+            draw_image_counter(screen, index, len(images))
             pygame.display.flip()
 
             # Start preloading next image
