@@ -56,7 +56,7 @@ def fit_image_to_screen(image: Image.Image, screen_size):
 
 def run_viewer(images: List[Path], output_dir: Path, start_index: int):
     pygame.init()
-    pygame.display.set_caption("Image Shortlister")
+    pygame.display.set_caption("Image Picker")
 
     screen = pygame.display.set_mode((1280, 800), pygame.RESIZABLE)
     clock = pygame.time.Clock()
