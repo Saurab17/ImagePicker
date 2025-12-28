@@ -58,7 +58,7 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
     pygame.init()
     pygame.display.set_caption("Image Picker")
 
-    screen = pygame.display.set_mode((1280, 800), pygame.RESIZABLE)
+    screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
     clock = pygame.time.Clock()
 
     index = start_index
