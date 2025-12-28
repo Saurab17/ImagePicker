@@ -4,7 +4,6 @@ Image Shortlisting Tool
 Python 3.12 compatible
 """
 
-import os
 import sys
 import json
 import shutil
@@ -48,11 +47,6 @@ def copy_image_async(src: Path, dst_dir: Path) -> None:
     threading.Thread(target=worker, daemon=True).start()
 
 
-def fit_image_to_screen(image: Image.Image, screen_size):
-    image.thumbnail(screen_size, Image.LANCZOS)
-    return image
-
-
 def load_surface(image_path: Path, screen_size):
     with Image.open(image_path) as img:
         img = ImageOps.exif_transpose(img)
@@ -81,7 +75,6 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
     next_index = None
     prev_surface = None
     prev_index = None
-    preload_thread = None
 
     # Font for image counter overlay
     font_size = 36  # visible but not intrusive
