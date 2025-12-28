@@ -79,25 +79,33 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
     current_surface = None
     next_surface = None
     next_index = None
+    prev_surface = None
+    prev_index = None
     preload_thread = None
 
     # Font for image counter overlay
     font_size = 36  # visible but not intrusive
     counter_font = pygame.font.SysFont("DejaVu Sans", font_size, bold=True)
 
-    def preload_next(index_to_preload):
-        nonlocal next_surface, next_index
+    def preload_surface(target_index):
+        nonlocal next_surface, next_index, prev_surface, prev_index
 
-        if index_to_preload >= len(images):
+        if target_index < 0 or target_index >= len(images):
             return
 
         try:
-            surface = load_surface(images[index_to_preload], screen.get_size())
-            next_surface = surface
-            next_index = index_to_preload
+            surface = load_surface(images[target_index], screen.get_size())
+
+            if target_index == index + 1:
+                next_surface = surface
+                next_index = target_index
+
+            elif target_index == index - 1:
+                prev_surface = surface
+                prev_index = target_index
+
         except Exception:
-            next_surface = None
-            next_index = None
+            pass
 
     def draw_image_counter(surface, index, total):
         text = f"{index + 1} / {total}"
@@ -132,20 +140,25 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
             if current_surface is None:
                 current_surface = load_surface(images[index], screen.get_size())
 
+                # Preload neighbors once
+                if index + 1 < len(images):
+                    threading.Thread(
+                        target=preload_surface,
+                        args=(index + 1,),
+                        daemon=True
+                    ).start()
+
+                if index - 1 >= 0:
+                    threading.Thread(
+                        target=preload_surface,
+                        args=(index - 1,),
+                        daemon=True
+                    ).start()
+
             rect = current_surface.get_rect(center=screen.get_rect().center)
             screen.blit(current_surface, rect)
             draw_image_counter(screen, index, len(images))
             pygame.display.flip()
-
-            # Start preloading next image
-            preload_target = index + 1
-            if preload_target < len(images):
-                preload_thread = threading.Thread(
-                    target=preload_next,
-                    args=(preload_target,),
-                    daemon=True
-                )
-                preload_thread.start()
 
             needs_redraw = False
 
@@ -163,6 +176,10 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
                     if index < len(images) - 1:
                         index += 1
 
+                        # SHIFT WINDOW
+                        prev_surface = current_surface
+                        prev_index = index - 1
+
                         # Promote preloaded image if it matches
                         if next_surface is not None and next_index == index:
                             current_surface = next_surface
@@ -172,6 +189,14 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
                         # Clear old preload
                         next_surface = None
                         next_index = None
+
+                        # PRELOAD NEW NEXT
+                        if index + 1 < len(images):
+                            threading.Thread(
+                                target=preload_surface,
+                                args=(index + 1,),
+                                daemon=True
+                            ).start()
 
                         needs_redraw = True
                         save_state({
@@ -185,10 +210,25 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
                     if index > 0:
                         index -= 1
 
-                        current_surface = load_surface(images[index], screen.get_size())
+                        # SHIFT WINDOW
+                        next_surface = current_surface
+                        next_index = index + 1
 
-                        next_surface = None
-                        next_index = None
+                        if prev_surface is not None and prev_index == index:
+                            current_surface = prev_surface
+                        else:
+                            current_surface = load_surface(images[index], screen.get_size())
+
+                        prev_surface = None
+                        prev_index = None
+
+                        # PRELOAD NEW PREVIOUS
+                        if index - 1 >= 0:
+                            threading.Thread(
+                                target=preload_surface,
+                                args=(index - 1,),
+                                daemon=True
+                            ).start()
 
                         needs_redraw = True
                         save_state({
