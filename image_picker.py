@@ -54,6 +54,18 @@ def fit_image_to_screen(image: Image.Image, screen_size):
     return image
 
 
+def load_surface(image_path: Path, screen_size):
+    with Image.open(image_path) as img:
+        img = img.convert("RGB")
+        img.thumbnail(screen_size, Image.LANCZOS)
+
+        surface = pygame.image.fromstring(
+            img.tobytes(), img.size, img.mode
+        ).convert()
+
+    return surface
+
+
 def run_viewer(images: List[Path], output_dir: Path, start_index: int):
     pygame.init()
     pygame.display.set_caption("Image Picker")
@@ -64,22 +76,47 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
     index = start_index
     needs_redraw = True
 
+    current_surface = None
+    next_surface = None
+    next_index = None
+    preload_thread = None
+
+    def preload_next(index_to_preload):
+        nonlocal next_surface, next_index
+
+        if index_to_preload >= len(images):
+            return
+
+        try:
+            surface = load_surface(images[index_to_preload], screen.get_size())
+            next_surface = surface
+            next_index = index_to_preload
+        except Exception:
+            next_surface = None
+            next_index = None
+
     while True:
         if needs_redraw:
             screen.fill(WINDOW_BG_COLOR)
 
-            img_path = images[index]
-            with Image.open(img_path) as img:
-                pil_img = img.convert("RGB")
-                pil_img = fit_image_to_screen(pil_img, screen.get_size())
-                img_surface = pygame.image.fromstring(
-                    pil_img.tobytes(), pil_img.size, pil_img.mode
-                )
+            # Use preloaded image if available
+            if current_surface is None:
+                current_surface = load_surface(images[index], screen.get_size())
 
-            rect = img_surface.get_rect(center=screen.get_rect().center)
-            screen.blit(img_surface, rect)
-
+            rect = current_surface.get_rect(center=screen.get_rect().center)
+            screen.blit(current_surface, rect)
             pygame.display.flip()
+
+            # Start preloading next image
+            preload_target = index + 1
+            if preload_target < len(images):
+                preload_thread = threading.Thread(
+                    target=preload_next,
+                    args=(preload_target,),
+                    daemon=True
+                )
+                preload_thread.start()
+
             needs_redraw = False
 
         for event in pygame.event.get():
@@ -95,6 +132,17 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
                 elif event.key == pygame.K_RIGHT:
                     if index < len(images) - 1:
                         index += 1
+
+                        # Promote preloaded image if it matches
+                        if next_surface is not None and next_index == index:
+                            current_surface = next_surface
+                        else:
+                            current_surface = load_surface(images[index], screen.get_size())
+
+                        # Clear old preload
+                        next_surface = None
+                        next_index = None
+
                         needs_redraw = True
                         save_state({
                             "images_root": str(images[0].parents[len(images[0].parents) - 1]),
@@ -106,6 +154,12 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
                 elif event.key == pygame.K_LEFT:
                     if index > 0:
                         index -= 1
+
+                        current_surface = load_surface(images[index], screen.get_size())
+
+                        next_surface = None
+                        next_index = None
+
                         needs_redraw = True
                         save_state({
                             "images_root": str(images[0].parents[len(images[0].parents) - 1]),
@@ -115,6 +169,7 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
                         })
 
                 elif event.key == pygame.K_RETURN:
+                    img_path = images[index]
                     copy_image_async(img_path, output_dir)
 
         clock.tick(60)
