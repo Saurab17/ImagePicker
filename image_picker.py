@@ -66,7 +66,7 @@ def load_surface(image_path: Path, screen_size):
     return surface
 
 
-def run_viewer(images: List[Path], output_dir: Path, start_index: int):
+def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_index: int):
     pygame.init()
     pygame.display.set_caption("Image Picker")
 
@@ -145,7 +145,7 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
 
                         needs_redraw = True
                         save_state({
-                            "images_root": str(images[0].parents[len(images[0].parents) - 1]),
+                            "images_root": str(images_root),
                             "output_dir": str(output_dir),
                             "current_index": index,
                             "total_images": len(images)
@@ -162,7 +162,7 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
 
                         needs_redraw = True
                         save_state({
-                            "images_root": str(images[0].parents[len(images[0].parents) - 1]),
+                            "images_root": str(images_root),
                             "output_dir": str(output_dir),
                             "current_index": index,
                             "total_images": len(images)
@@ -197,7 +197,7 @@ def prompt_new_operation():
         "total_images": len(images)
     })
 
-    run_viewer(images, output_dir, 0)
+    run_viewer(images_dir, images, output_dir, 0)
 
 
 def prompt_resume_operation(state: dict):
@@ -206,7 +206,7 @@ def prompt_resume_operation(state: dict):
     start_index = state["current_index"]
 
     images = scan_images(images_dir)
-    run_viewer(images, output_dir, start_index)
+    run_viewer(images_dir, images, output_dir, start_index)
 
 
 def main():
