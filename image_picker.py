@@ -83,11 +83,17 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
     def preload_surface(target_index):
         nonlocal next_surface, next_index, prev_surface, prev_index
 
+        snapshot_index = index
+
         if target_index < 0 or target_index >= len(images):
             return
 
         try:
             surface = load_surface(images[target_index], screen.get_size())
+
+            # Drop stale preload
+            if snapshot_index != index:
+                return
 
             if target_index == index + 1:
                 next_surface = surface
