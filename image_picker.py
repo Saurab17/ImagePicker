@@ -62,22 +62,25 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
     clock = pygame.time.Clock()
 
     index = start_index
+    needs_redraw = True
 
     while True:
-        screen.fill(WINDOW_BG_COLOR)
+        if needs_redraw:
+            screen.fill(WINDOW_BG_COLOR)
 
-        img_path = images[index]
-        with Image.open(img_path) as img:
-            pil_img = img.convert("RGB")
-            pil_img = fit_image_to_screen(pil_img, screen.get_size())
-            img_surface = pygame.image.fromstring(
-                pil_img.tobytes(), pil_img.size, pil_img.mode
-            )
+            img_path = images[index]
+            with Image.open(img_path) as img:
+                pil_img = img.convert("RGB")
+                pil_img = fit_image_to_screen(pil_img, screen.get_size())
+                img_surface = pygame.image.fromstring(
+                    pil_img.tobytes(), pil_img.size, pil_img.mode
+                )
 
-        rect = img_surface.get_rect(center=screen.get_rect().center)
-        screen.blit(img_surface, rect)
+            rect = img_surface.get_rect(center=screen.get_rect().center)
+            screen.blit(img_surface, rect)
 
-        pygame.display.flip()
+            pygame.display.flip()
+            needs_redraw = False
 
         save_state({
             "images_root": str(images[0].parents[len(images[0].parents) - 1]),
