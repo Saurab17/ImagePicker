@@ -170,6 +170,7 @@ def run_viewer(images_root: Path, images: List[Path], output_dir: Path, start_in
 
                 elif event.key == pygame.K_RETURN:
                     img_path = images[index]
+                    print("Picking image:",img_path)
                     copy_image_async(img_path, output_dir)
 
         clock.tick(60)
