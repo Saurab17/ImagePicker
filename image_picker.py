@@ -13,8 +13,7 @@ from pathlib import Path
 from typing import List
 
 import pygame
-from PIL import Image
-
+from PIL import Image, ImageOps
 
 STATE_FILE = "shortlist_state.json"
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
@@ -56,6 +55,7 @@ def fit_image_to_screen(image: Image.Image, screen_size):
 
 def load_surface(image_path: Path, screen_size):
     with Image.open(image_path) as img:
+        img = ImageOps.exif_transpose(img)
         img = img.convert("RGB")
         img.thumbnail(screen_size, Image.LANCZOS)
 
