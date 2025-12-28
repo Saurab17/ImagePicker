@@ -100,10 +100,14 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
                     sys.exit(0)
 
                 elif event.key == pygame.K_RIGHT:
-                    index = min(index + 1, len(images) - 1)
+                    if index < len(images) - 1:
+                        index += 1
+                        needs_redraw = True
 
                 elif event.key == pygame.K_LEFT:
-                    index = max(index - 1, 0)
+                    if index > 0:
+                        index -= 1
+                        needs_redraw = True
 
                 elif event.key == pygame.K_RETURN:
                     copy_image_async(img_path, output_dir)
