@@ -82,13 +82,6 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
             pygame.display.flip()
             needs_redraw = False
 
-        save_state({
-            "images_root": str(images[0].parents[len(images[0].parents) - 1]),
-            "output_dir": str(output_dir),
-            "current_index": index,
-            "total_images": len(images)
-        })
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -101,11 +94,23 @@ def run_viewer(images: List[Path], output_dir: Path, start_index: int):
 
                 elif event.key == pygame.K_RIGHT:
                     if index < len(images) - 1:
+                        save_state({
+                            "images_root": str(images[0].parents[len(images[0].parents) - 1]),
+                            "output_dir": str(output_dir),
+                            "current_index": index,
+                            "total_images": len(images)
+                        })
                         index += 1
                         needs_redraw = True
 
                 elif event.key == pygame.K_LEFT:
                     if index > 0:
+                        save_state({
+                            "images_root": str(images[0].parents[len(images[0].parents) - 1]),
+                            "output_dir": str(output_dir),
+                            "current_index": index,
+                            "total_images": len(images)
+                        })
                         index -= 1
                         needs_redraw = True
 
