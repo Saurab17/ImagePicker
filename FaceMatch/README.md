@@ -34,6 +34,8 @@ Implementation roadmap is phase-driven.
 
 - Offline face-based image search
 - Persistent reusable identity database
+- Automatic identity reconciliation from new reference images
+- Incremental identity improvement across tasks
 - Resumable long-running tasks
 - Pluggable ML backends
 - API-first architecture
@@ -127,11 +129,31 @@ Reference Images
    Clustering
         │
         ▼
-Identity Review UI
+Existing Identity Matching
+        │
+        ▼
+ Identity Review UI
         │
         ▼
  Persistent Identity Database
 ```
+
+---
+
+# Identity Persistence
+
+FaceMatch maintains a persistent reusable identity database.
+
+When new reference images are processed, FaceMatch may suggest
+existing identities that appear similar to newly detected persons.
+
+Users may:
+- confirm existing identities
+- reject incorrect matches
+- create entirely new identities
+- improve existing identities with additional reference images
+
+This enables incremental identity improvement across future tasks.
 
 ---
 
@@ -197,6 +219,7 @@ project/
 - Cross-platform portability
 - Swappable ML backends
 - Persistent resumable operations
+- Persistent evolving identity management
 
 ---
 
