@@ -1,51 +1,137 @@
-# Face-Based Image Shortlisting System
+# FaceMatch
 
-Offline, cross-platform, modular image shortlisting system using modern face detection and face recognition pipelines.
+Offline, modular, cross-platform face-based image shortlisting system.
 
-The system scans image collections, detects faces, generates embeddings, performs vector similarity search, and shortlists images containing selected persons.
+FaceMatch scans large image collections, detects faces, clusters identities from reference images, performs vector similarity search, and exports shortlisted results containing selected persons.
 
-The project is designed for:
-
-- Offline operation
-- Cross-platform execution
-- Modular isolated components
-- Docker-first development
-- CPU and GPU support
+Designed for:
+- Offline execution
+- Cross-platform deployment
+- Modular ML pipelines
+- API-driven architecture
+- CPU and GPU runtimes
 - Large-scale image collections
-- Future extensibility
+- Future distributed execution
+
+---
+
+## Project Status
+
+⚠️ FaceMatch is currently under active architecture and infrastructure development.
+
+The project is presently focused on:
+- Core pipeline contracts
+- Shared schemas/interfaces
+- Resource-aware orchestration
+- Persistent task architecture
+- Cross-platform build infrastructure
+
+Implementation roadmap is phase-driven.
 
 ---
 
 # Core Features
 
-## Reference Person Detection
-
-The system accepts a reference image folder and automatically:
-
-- detects faces
-- extracts embeddings
-- clusters distinct persons
-- generates candidate identities
-- allows user confirmation
-
----
-
-## Bulk Image Search
-
-The system recursively scans image collections and:
-
-- detects faces
-- generates embeddings
-- searches embeddings using vector similarity
-- identifies images containing selected persons
-- exports shortlisted results
+- Offline face-based image search
+- Persistent reusable identity database
+- Resumable long-running tasks
+- Pluggable ML backends
+- API-first architecture
+- CPU/GPU runtime support
+- Desktop, Android, and web client support
+- Low-copy / shared-memory-oriented pipeline design
+- Containerized development workflow
 
 ---
 
-## Fully Offline
+# High-Level Architecture
 
-No cloud APIs.
-No internet dependency during runtime.
+```text
+Clients
+   │
+   ▼
+API Layer
+   │
+   ▼
+Task Manager
+   │
+   ▼
+Orchestrator
+   │
+   ▼
+Pipeline Modules
+   │
+   ├── Scanner
+   ├── Decoder
+   ├── Detector
+   ├── Aligner
+   ├── Embedder
+   ├── Clusterer
+   ├── Indexer
+   ├── Matcher
+   └── Exporter
+   │
+   ▼
+Database + Vector Index + Shared Memory
+```
+
+---
+
+# Main Processing Pipeline
+
+```text
+Filesystem Images
+        │
+        ▼
+    Scanner
+        │
+        ▼
+    Decoder
+        │
+        ▼
+    Detector
+        │
+        ▼
+    Aligner
+        │
+        ▼
+    Embedder
+        │
+        ▼
+     Indexer
+        │
+        ▼
+     Matcher
+        │
+        ▼
+     Exporter
+        │
+        ▼
+  Shortlisted Results
+```
+
+---
+
+# Reference Identity Workflow
+
+```text
+Reference Images
+        │
+        ▼
+    Detection
+        │
+        ▼
+   Embeddings
+        │
+        ▼
+   Clustering
+        │
+        ▼
+Identity Review UI
+        │
+        ▼
+ Persistent Identity Database
+```
 
 ---
 
@@ -54,359 +140,157 @@ No internet dependency during runtime.
 | Layer | Technology |
 |---|---|
 | Language | Python 3.12 |
-| Face Detection | SCRFD |
-| Face Recognition | ArcFace |
-| ML Framework | InsightFace |
 | Runtime | ONNX Runtime |
+| Detection | SCRFD |
+| Recognition | ArcFace |
 | Vector Search | FAISS |
 | Clustering | HDBSCAN |
-| Image Decode | OpenCV |
-| UI | PySide6 |
+| API | FastAPI |
+| Desktop UI | PySide6 |
 | Database | SQLite |
-| Packaging | Docker |
-| Testing | Pytest |
+| Packaging | Docker + PyInstaller |
+| Testing | PyTest |
 | Linting | Ruff |
 | Formatting | Black |
-| Type Checking | MyPy |
+| Typing | MyPy |
+
+---
+
+# Project Structure
+
+```text
+project/
+├── backend/
+├── clients/
+├── configs/
+├── docker/
+├── models/
+├── data/
+├── scripts/
+├── tests/
+├── benchmarks/
+├── packaging/
+└── docs/
+```
 
 ---
 
 # Supported Platforms
 
-| OS | Support |
+| Platform | Status |
 |---|---|
-| Ubuntu 24.04+ | Primary |
-| Windows 11 | Supported |
-| Windows 10 | Supported |
+| Linux | Planned |
+| Windows | Planned |
+| Android | Planned |
+| Web | Planned |
 | macOS | Future |
 
 ---
 
-# Runtime Modes
+# Architecture Principles
 
-## CPU Mode
-
-Uses:
-- ONNX Runtime CPU
-- AVX2 optimizations
-
-Recommended for:
-- laptops
-- servers
-- Raspberry Pi testing
-- portability
+- Modular isolated components
+- Stable interfaces/contracts
+- API-first communication
+- Shared-memory-oriented processing
+- Resource-aware execution
+- Cross-platform portability
+- Swappable ML backends
+- Persistent resumable operations
 
 ---
 
-## GPU Mode
+# Planned Runtime Support
 
-Uses:
-- NVIDIA CUDA
-- ONNX Runtime GPU
-
-Recommended for:
-- large image collections
-- high-throughput processing
+- CPU execution
+- CUDA acceleration
+- TensorRT acceleration
+- Future mobile runtimes
 
 ---
 
-# High-Level Pipeline
+# Development Roadmap
 
-## Phase 1 — Reference Processing
-
-Input:
-```
-reference_people/
-```
-
-Pipeline:
-1. Scan images
-2. Detect faces
-3. Align faces
-4. Generate embeddings
-5. Cluster distinct persons
-6. Generate preview identities
-7. User confirms persons
-
-Output:
-- confirmed person identities
-- reference embeddings
-
----
-
-## Phase 2 — Main Image Search
-
-Input:
-```
-images_root/
-```
-
-Pipeline:
-1. Recursive image scan
-2. Image decode
-3. Face detection
-4. Face alignment
-5. Embedding generation
-6. FAISS similarity search
-7. Match filtering
-8. Shortlist export
-
-Output:
-- shortlisted images
-- JSON export
-- CSV export
-- optional copied/symlinked results
-
----
-
-# Matching Strategy
-
-The system uses:
-
-- multiple embeddings per person
-- cosine similarity
-- configurable thresholds
-- optional centroid embeddings
-
-This improves robustness for:
-- lighting variation
-- beard changes
-- side profiles
-- aging
-- glasses
-
----
-
-# Performance Design
-
-## Key Principles
-
-- avoid full image processing where unnecessary
-- crop only detected faces
-- parallelize pipeline stages
-- use vector indexing instead of brute force search
-
----
-
-# Expected Inputs
-
-## Reference Images
-
-Examples:
-```
-reference_people/
-├── person_1/
-├── person_2/
-```
-
-OR mixed images:
-```
-reference_people/
-├── img001.jpg
-├── img002.jpg
-```
-
----
-
-## Main Search Images
-
-Examples:
-```
-images_root/
-├── events/
-├── camera/
-├── whatsapp/
-```
-
-Supported formats:
-- JPG
-- JPEG
-- PNG
-- WEBP
-- HEIC (optional plugin)
-
----
-
-# Expected Outputs
-
-## Shortlisted Images
-
-Example:
-```
-output/
-├── shortlisted/
-```
-
----
-
-## Export Files
-
-Example:
-```
-output/
-├── matches.json
-├── matches.csv
-```
-
----
-
-# Database Design
-
-SQLite database stores:
-
-- image metadata
-- face metadata
-- embeddings
-- clustering results
-- processing state
-
----
-
-# Example Database Tables
-
-## images
-
-```sql
-images(
-    image_id,
-    path,
-    hash,
-    processed_at
-)
-```
-
-## faces
-
-```sql
-faces(
-    face_id,
-    image_id,
-    bbox,
-    embedding_path,
-    confidence
-)
-```
-
-## persons
-
-```sql
-persons(
-    person_id,
-    label,
-    reference_embedding
-)
-```
-
----
-
-# Containerization Strategy
-
-Each major module is independently containerized.
-
-Benefits:
-- isolated dependencies
-- reproducible environments
-- independent testing
-- easier CI/CD
-- avoids system package conflicts
-
----
-
-# Module Isolation Philosophy
-
-Each module should:
-
-- expose clean interfaces
-- have isolated tests
-- have isolated containers
-- avoid hidden dependencies
-- support standalone execution
-
----
-
-# Planned Modules
-
-| Module | Responsibility |
+| Phase | Status |
 |---|---|
-| scanner | filesystem scanning |
-| decoder | image decode |
-| detector | face detection |
-| aligner | face alignment |
-| embedder | embedding generation |
-| clusterer | identity clustering |
-| indexer | FAISS indexing |
-| matcher | similarity matching |
-| exporter | result export |
-| ui | user interface |
-| database | persistence |
-| orchestrator | pipeline coordination |
+| Foundation & Infrastructure | In Progress |
+| Scanner | Planned |
+| Decoder | Planned |
+| Detector | Planned |
+| Aligner | Planned |
+| Embedder | Planned |
+| Database | Planned |
+| Task Manager | Planned |
+| Clusterer | Planned |
+| Indexer | Planned |
+| Matcher | Planned |
+| Exporter | Planned |
+| API Layer | Planned |
+| Client Applications | Planned |
 
 ---
 
-# Development Requirements
+# Getting Started
 
-## Ubuntu
+## Development Setup
 
-Install:
-- Docker
-- Docker Compose
-- NVIDIA Container Toolkit (optional GPU)
+TBD after foundational infrastructure phases are completed.
 
----
-
-## Windows
-
-Install:
-- Docker Desktop
-- WSL2 recommended
-- NVIDIA CUDA drivers (optional GPU)
+Planned setup areas:
+- bootstrap scripts
+- dependency installation
+- model downloads
+- development containers
+- CI workflows
 
 ---
 
-# Python Standards
+## Running FaceMatch
 
-Project conventions:
+TBD after orchestrator and API phases are completed.
 
-- Python 3.12
-- PEP 8 compliant
-- snake_case naming
-- PascalCase classes
-- Google-style docstrings
-
----
-
-# Testing Strategy
-
-## Standalone Module Tests
-
-Each module:
-- unit tests
-- container tests
-- integration tests
+Planned runtime modes:
+- Desktop application
+- API server
+- Docker deployment
+- GPU runtime
+- CPU runtime
 
 ---
 
-## Integrated Pipeline Tests
+## Build & Packaging
 
-End-to-end:
-- reference processing
-- embedding generation
-- matching
-- shortlist generation
+TBD after packaging/build pipeline phases are completed.
+
+Planned outputs:
+- Windows installers
+- Linux AppImages
+- Android APKs
+- Docker images
 
 ---
 
-# Future Enhancements
+# CI/CD
 
-- video support
-- duplicate detection
-- blur filtering
-- face quality scoring
-- distributed processing
-- REST API
-- web UI
-- live monitoring
-- incremental indexing
+Planned GitHub Actions workflows:
+- automated testing
+- Docker builds
+- Linux builds
+- Windows builds
+- Android builds
+- artifact publishing
+
+---
+
+# Future Expansion Areas
+
+- Video support
+- Distributed execution
+- Incremental indexing
+- TensorRT optimization
+- Remote worker nodes
+- Live monitoring
+- Native mobile runtimes
 
 ---
 
